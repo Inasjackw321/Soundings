@@ -1,112 +1,169 @@
-# Weather Soundings Visualizer
+# Professional Weather Soundings Analysis System
 
-An interactive web application for visualizing atmospheric soundings using custom-rendered Skew-T Log-P diagrams.
+A comprehensive web-based platform for analyzing atmospheric soundings with integrated radar, NWS data, and advanced visualization tools. Built for meteorologists, weather enthusiasts, and atmospheric researchers.
+
+![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ## Features
 
-- **Real-time Data Fetching**: Retrieves atmospheric sounding data from the University of Wyoming's archive
-- **Custom Skew-T Diagrams**: Hand-crafted canvas-based visualization following meteorological standards
-- **Interactive Controls**: Select from multiple weather stations across North America
-- **Comprehensive Display**: Shows temperature, dewpoint, wind profiles, and derived parameters
-- **Responsive Design**: Clean, modern interface that works across devices
+### Interactive Station Selection
+- **Interactive Map**: Click-to-select stations on a Leaflet-powered map
+- **70+ Stations**: Comprehensive coverage of North America radiosonde stations
+- **Station Details**: View coordinates, NEXRAD radar site, and NWS office information
+- **Regional Grouping**: Stations organized by geographic region
 
-## What are Weather Soundings?
+### Advanced Sounding Visualization
+- **Skew-T Log-P Diagrams**: Professional-grade custom canvas rendering
+- **Temperature & Dewpoint Profiles**: Color-coded curves with data points
+- **Wind Barbs**: Standard meteorological wind notation at multiple levels
+- **Atmospheric Parameters**: Calculated indices including:
+  - Surface conditions (pressure, temperature, dewpoint)
+  - Mandatory level temps (850mb, 700mb, 500mb)
+  - Lifting Condensation Level (LCL)
+  - Maximum wind speed aloft
+  - Precipitable water
+  - CAPE and CIN (when available)
 
-Weather soundings are vertical profiles of the atmosphere, measuring:
-- Temperature
-- Dewpoint (moisture)
-- Pressure
-- Wind speed and direction
-- Altitude
+### Complete Sounding Data Table
+- **Full Vertical Profile**: Every pressure level displayed
+- **Comprehensive Variables**: Pressure, height, temperature, dewpoint, RH, wind
+- **Calculated Values**: Relative humidity computed from temperature and dewpoint
+- **Sortable & Scrollable**: Easy data exploration
 
-These measurements are crucial for weather forecasting, especially for predicting severe weather, aviation conditions, and atmospheric stability.
+### NEXRAD Radar Integration
+- **Real-Time Radar**: Live NEXRAD radar imagery from NOAA
+- **Multiple Products**: Base reflectivity, velocity, storm relative velocity
+- **Auto-Refresh**: Keep radar data current
+- **Station-Linked**: Automatically loads nearest radar site
 
-## What is a Skew-T Log-P Diagram?
+### NWS Data Integration
+- **Forecast Discussion**: Latest NWS forecast for station location
+- **Active Alerts**: Weather warnings, watches, and advisories
+- **Current Observations**: Real-time METAR data including:
+  - Temperature and dewpoint
+  - Wind speed and direction
+  - Pressure and humidity
+  - Visibility and conditions
+  - Observation timestamp
 
-A Skew-T Log-P diagram is the standard meteorological tool for analyzing atmospheric soundings. Key features:
+### Save & Export Tools
+- **Multiple Formats**:
+  - **JSON**: Full data export for analysis
+  - **CSV**: Spreadsheet-compatible tabular data
+  - **PNG**: High-quality diagram image export
+  - **PDF**: Complete report with diagram and parameters
+- **Quick Export**: One-click image export from header
+- **Timestamped Files**: Automatic naming with station and date
 
-- **Logarithmic pressure scale** (Y-axis): Pressure decreases logarithmically with height
-- **Skewed temperature lines** (X-axis): Temperature lines are rotated 45° to better show atmospheric processes
-- **Dry adiabats**: Show temperature changes for rising unsaturated air parcels
-- **Isotherms**: Lines of constant temperature
-- **Wind barbs**: Show wind direction and speed at different levels
+### Professional UI/UX
+- **Dark Theme**: Easy on the eyes for long analysis sessions
+- **Three-Panel Layout**: Map/controls, sounding display, radar/NWS data
+- **Responsive Design**: Works on desktop, tablet, and mobile
+- **Modal Dialogs**: Clean interface for save options
+- **Status Messages**: Real-time feedback on all operations
 
-## Usage
+## Installation & Usage
 
-### Running Locally
+### Quick Start (Open Locally)
 
-1. Clone this repository
-2. Open `index.html` in a web browser
-3. The application loads sample data on startup
+1. Clone or download this repository
+2. Open `index.html` in a modern web browser
+3. That's it! No build process or server required
 
-### Fetching Real Data
+### Deployment to Web Server
 
-1. Select a weather station from the dropdown
-2. Choose a date (note: data is typically 1-2 days delayed)
-3. Select observation time (00Z or 12Z)
-4. Click "Fetch Sounding"
+Deploy to any static hosting service:
 
-**Note**: Due to CORS restrictions, fetching real data requires a CORS proxy. The application uses a public proxy by default. For production use, implement a backend proxy server.
+```bash
+# Example: Deploy to GitHub Pages
+git add .
+git commit -m "Deploy soundings app"
+git push origin main
 
-### Interpreting the Diagram
+# Or use Netlify CLI
+netlify deploy --prod
 
-- **Red line**: Temperature profile
-- **Green line**: Dewpoint profile
-- **Gray dashed lines**: Dry adiabatic lines
-- **Wind barbs**: Located on the right side
-  - Each full barb = 10 knots
-  - Direction shows where wind is coming from
+# Or use Vercel
+vercel --prod
+```
 
-### Atmospheric Parameters
+### Using the Application
 
-The application calculates and displays:
+1. **Select a Station**
+   - Click on a station marker on the map, OR
+   - Choose from the dropdown menu
+   - Station info appears in left panel
 
-- **Surface Pressure**: Ground level atmospheric pressure
-- **Surface Temperature**: Ground level temperature
-- **Surface Dewpoint**: Ground level moisture content
-- **500mb Temperature**: Temperature at ~18,000 feet (important forecast parameter)
-- **LCL Height**: Lifting Condensation Level (cloud base height)
-- **Max Wind Speed**: Strongest wind in the profile
+2. **Choose Date & Time**
+   - Select date (soundings typically 1-2 days delayed)
+   - Choose observation time (00Z or 12Z)
 
-## Technical Details
+3. **Load Sounding**
+   - Click "Load Sounding Data"
+   - View diagram, data table, and parameters
 
-### Architecture
+4. **View Additional Data**
+   - Radar imagery loads automatically
+   - NWS forecast and alerts populate right panel
+   - Current observations show real-time METAR
 
-- **Pure JavaScript**: No external libraries or frameworks
-- **Canvas Rendering**: Custom drawing for precise meteorological visualization
-- **Modular Design**: Separated concerns (data, visualization, UI)
+5. **Save Your Analysis**
+   - Click "Save Analysis" for full modal
+   - Or "Export Image" for quick PNG export
 
-### Files
+## Technical Architecture
 
-- `index.html`: Main HTML structure
-- `styles.css`: Responsive styling
-- `app.js`: Application controller and UI logic
-- `sounding.js`: Data fetching and parsing
-- `skewt.js`: Skew-T diagram rendering engine
+### Frontend Stack
+- **Pure JavaScript**: No frameworks, maximum performance
+- **HTML5 Canvas**: Custom Skew-T rendering
+- **Leaflet.js**: Interactive mapping
+- **jsPDF**: PDF generation
 
-### Data Source
+### Modules
 
-University of Wyoming Department of Atmospheric Science
-- URL: http://weather.uwyo.edu/upperair/sounding.html
-- Format: Text-based sounding data
-- Availability: Global stations, typically 00Z and 12Z observations
+```
+├── index.html          # Main application structure
+├── styles.css          # Professional dark theme styling
+├── stations.js         # Station database (70+ stations)
+├── map.js             # Interactive map functionality
+├── skewt.js           # Skew-T diagram renderer
+├── sounding.js        # Data fetching and parsing
+├── radar.js           # NEXRAD radar integration
+├── nws.js             # National Weather Service API
+├── save.js            # Export functionality
+├── app.js             # Main application controller
+└── README.md          # This file
+```
 
-## Deployment
+### Data Sources
 
-### Simple Deployment
+- **Sounding Data**: University of Wyoming Upper Air Archive
+- **Radar Imagery**: NOAA NEXRAD via Iowa Environmental Mesonet
+- **Forecasts & Alerts**: NWS API (api.weather.gov)
+- **Current Observations**: NWS METAR observations
 
-Host the static files on any web server:
-- GitHub Pages
-- Netlify
-- Vercel
-- AWS S3 + CloudFront
+### Key Technologies
 
-### Production Deployment
+- **Leaflet**: v1.9.4 - Interactive maps
+- **jsPDF**: v2.5.1 - PDF generation
+- **Canvas API**: Custom diagram rendering
+- **Fetch API**: Async data retrieval
 
-For reliable real-time data access, implement a backend proxy:
+## API & Data Access
+
+### CORS Considerations
+
+The application uses public APIs that may have CORS restrictions:
+
+- **Wyoming Soundings**: Uses CORS proxy (allorigins.win)
+- **NWS API**: Generally CORS-friendly
+- **NEXRAD Radar**: Direct image loading
+
+For production deployment with high reliability, implement a backend proxy:
 
 ```javascript
-// Example Node.js proxy
+// Example Node.js proxy endpoint
 app.get('/api/sounding', async (req, res) => {
     const { station, year, month, day, hour } = req.query;
     const url = `http://weather.uwyo.edu/cgi-bin/sounding?...`;
@@ -116,49 +173,155 @@ app.get('/api/sounding', async (req, res) => {
 });
 ```
 
-Then update `sounding.js` to use your proxy instead of the CORS proxy.
+## Atmospheric Parameters Explained
+
+### Surface Conditions
+- Pressure, temperature, and dewpoint at ground level
+- Critical for near-surface stability assessment
+
+### Mandatory Levels
+- **850mb (~5,000 ft)**: Low-level moisture and temperature
+- **700mb (~10,000 ft)**: Mid-level analysis
+- **500mb (~18,000 ft)**: Vorticity maximum, used in forecasting
+
+### Derived Indices
+- **LCL**: Lifting Condensation Level - cloud base height
+- **CAPE**: Convective Available Potential Energy - thunderstorm fuel
+- **CIN**: Convective Inhibition - cap strength
 
 ## Browser Compatibility
 
-- Chrome/Edge: Full support
-- Firefox: Full support
-- Safari: Full support
-- Mobile browsers: Responsive design, touch-friendly
+- Chrome/Edge: Full support ✓
+- Firefox: Full support ✓
+- Safari: Full support ✓
+- Mobile browsers: Responsive layout ✓
+
+## Development
+
+### Project Structure
+
+```
+Soundings/
+│
+├── Core Application
+│   ├── index.html          # Main HTML structure
+│   ├── styles.css          # Styling and layout
+│   └── app.js              # Application controller
+│
+├── Data & Integration
+│   ├── stations.js         # Station database
+│   ├── sounding.js         # Sounding data fetcher
+│   ├── radar.js            # Radar display
+│   └── nws.js              # NWS API integration
+│
+├── Visualization
+│   ├── skewt.js            # Diagram renderer
+│   └── map.js              # Interactive map
+│
+└── Utilities
+    └── save.js             # Export functionality
+```
+
+### Adding New Stations
+
+Edit `stations.js`:
+
+```javascript
+{
+    id: '72XXX',           // WMO station ID
+    name: 'City, ST',      // Display name
+    icao: 'KXXX',         // ICAO code
+    lat: 00.00,           // Latitude
+    lon: -000.00,         // Longitude
+    radar: 'KXXX',        // NEXRAD site
+    nws: 'XXX'            // NWS office
+}
+```
+
+### Customizing the Diagram
+
+Modify `skewt.js` to adjust:
+- Canvas dimensions
+- Pressure range
+- Temperature range
+- Skew angle
+- Grid spacing
+- Color schemes
+
+## Troubleshooting
+
+### No Data Loading
+- Check date - soundings are typically 1-2 days delayed
+- Try a different station
+- Verify internet connection
+- Check browser console for errors
+
+### Radar Not Displaying
+- Some stations may have inactive radar sites
+- Try refreshing the radar manually
+- Check NOAA radar status
+
+### NWS Data Unavailable
+- API may be temporarily down
+- Station coordinates may not match NWS grid
+- Check api.weather.gov status
+
+### Map Not Loading
+- Verify Leaflet CDN is accessible
+- Check browser console for errors
+- Ensure JavaScript is enabled
 
 ## Future Enhancements
 
 Potential additions:
-- Parcel trajectory calculations
-- CAPE (Convective Available Potential Energy) calculation
-- Helicity calculations for severe weather
-- Export diagrams as images
-- Compare multiple soundings
-- Animation of temporal changes
-- Additional diagram types (e.g., hodographs)
-
-## Educational Use
-
-This application is perfect for:
-- Meteorology students learning to interpret soundings
-- Weather enthusiasts exploring atmospheric structure
-- Educators teaching atmospheric science
-- Amateur forecasters analyzing local conditions
-
-## License
-
-MIT License - Free to use and modify
-
-## Credits
-
-Created as a demonstration of custom atmospheric data visualization using web technologies.
-
-Data provided by the University of Wyoming Department of Atmospheric Science.
+- [ ] Hodograph display for wind shear analysis
+- [ ] Parcel trajectory calculations
+- [ ] Multiple sounding overlay comparison
+- [ ] Time series animation
+- [ ] Additional thermodynamic calculations
+- [ ] Satellite imagery integration
+- [ ] Model sounding comparisons
+- [ ] Custom color schemes
+- [ ] Annotation tools for diagrams
+- [ ] Social sharing capabilities
 
 ## Contributing
 
-Contributions welcome! Areas for improvement:
+Contributions are welcome! Areas for improvement:
 - Additional weather stations
 - More atmospheric calculations
-- Enhanced visualization features
-- Mobile optimization
+- Enhanced mobile experience
 - Accessibility improvements
+- Performance optimizations
+- Bug fixes
+
+## Credits
+
+- **Sounding Data**: University of Wyoming Department of Atmospheric Science
+- **Radar Data**: NOAA NEXRAD, Iowa Environmental Mesonet
+- **Forecast Data**: National Weather Service
+- **Mapping**: OpenStreetMap contributors, CartoDB, Leaflet
+- **PDF Generation**: jsPDF library
+
+## License
+
+MIT License - Free to use, modify, and distribute
+
+Copyright (c) 2024 Weather Soundings Analysis System
+
+## Acknowledgments
+
+Special thanks to:
+- University of Wyoming for maintaining the sounding archive
+- NOAA for providing radar and forecast data
+- The open-source community for excellent libraries
+- Meteorologists worldwide who use and provide feedback
+
+## Contact & Support
+
+For issues, feature requests, or contributions, please open an issue on the GitHub repository.
+
+---
+
+**Built with passion for meteorology and atmospheric science** 🌡️⛈️🌪️
+

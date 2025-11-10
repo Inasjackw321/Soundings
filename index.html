@@ -3,68 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Soundings Visualizer</title>
+    <title>Professional Weather Soundings Analysis</title>
+
+    <!-- Leaflet CSS for interactive maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Custom styles -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Weather Soundings Visualizer</h1>
-            <p class="subtitle">Interactive Skew-T Log-P Diagrams</p>
+    <div class="app-container">
+        <!-- Top Navigation -->
+        <header class="main-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>Weather Soundings Analysis System</h1>
+                    <p class="subtitle">Professional Atmospheric Sounding Visualization</p>
+                </div>
+                <div class="header-right">
+                    <button id="save-btn" class="action-button save-button">
+                        <span class="icon">💾</span> Save Analysis
+                    </button>
+                    <button id="export-image-btn" class="action-button">
+                        <span class="icon">📸</span> Export Image
+                    </button>
+                </div>
+            </div>
         </header>
 
-        <div class="controls-panel">
-            <div class="control-group">
-                <label for="station-select">Station:</label>
-                <select id="station-select">
-                    <optgroup label="North America">
-                        <option value="72327">Oakland, CA (KOAK)</option>
-                        <option value="72476">Denver, CO (KDEN)</option>
-                        <option value="72558">Amarillo, TX (KAMA)</option>
-                        <option value="72645">Dallas, TX (KDFW)</option>
-                        <option value="72672">Lake Charles, LA (KLCH)</option>
-                        <option value="72230">Spokane, WA (KOTX)</option>
-                        <option value="72528">Dodge City, KS (KDDC)</option>
-                        <option value="72340">Vandenberg AFB, CA (KVBG)</option>
-                        <option value="72493">Albuquerque, NM (KABQ)</option>
-                        <option value="72363">San Diego, CA (KNKX)</option>
-                        <option value="72451" selected>Salt Lake City, UT (KSLC)</option>
-                        <option value="72520">Rapid City, SD (KUNR)</option>
-                        <option value="72776">Nashville, TN (KBNA)</option>
-                        <option value="74389">Miami, FL (KMFL)</option>
-                    </optgroup>
-                </select>
-            </div>
+        <!-- Main Content Grid -->
+        <div class="main-grid">
+            <!-- Left Panel - Map & Controls -->
+            <aside class="left-panel">
+                <div class="panel-section">
+                    <h2 class="section-title">Station Selection</h2>
+                    <div id="map" class="station-map"></div>
+                    <div class="map-instructions">
+                        Click on a station marker to select
+                    </div>
+                </div>
 
-            <div class="control-group">
-                <label for="date-input">Date:</label>
-                <input type="date" id="date-input">
-            </div>
+                <div class="panel-section">
+                    <h2 class="section-title">Sounding Parameters</h2>
+                    <div class="controls-group">
+                        <div class="control-item">
+                            <label for="station-select">Station:</label>
+                            <select id="station-select" class="control-input">
+                                <!-- Will be populated by JavaScript -->
+                            </select>
+                        </div>
 
-            <div class="control-group">
-                <label for="hour-select">Hour (UTC):</label>
-                <select id="hour-select">
-                    <option value="00">00Z</option>
-                    <option value="12" selected>12Z</option>
-                </select>
-            </div>
+                        <div class="control-item">
+                            <label for="date-input">Date:</label>
+                            <input type="date" id="date-input" class="control-input">
+                        </div>
 
-            <button id="fetch-btn" class="fetch-button">Fetch Sounding</button>
-            <div id="status" class="status-message"></div>
-        </div>
+                        <div class="control-item">
+                            <label for="hour-select">Observation Time (UTC):</label>
+                            <select id="hour-select" class="control-input">
+                                <option value="00">00Z (Midnight UTC)</option>
+                                <option value="12" selected>12Z (Noon UTC)</option>
+                            </select>
+                        </div>
 
-        <div class="visualization-container">
-            <canvas id="skewt-canvas"></canvas>
-        </div>
+                        <button id="fetch-btn" class="fetch-button">
+                            <span class="icon">🌡️</span> Load Sounding Data
+                        </button>
 
-        <div class="info-panel" id="info-panel">
-            <h3>Atmospheric Parameters</h3>
-            <div id="parameters-display"></div>
+                        <div id="status" class="status-message"></div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2 class="section-title">Station Information</h2>
+                    <div id="station-info" class="station-info-display">
+                        <p class="info-placeholder">Select a station to view details</p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center Panel - Sounding Diagram -->
+            <main class="center-panel">
+                <div class="diagram-container">
+                    <div class="diagram-header">
+                        <h2 id="diagram-title">Skew-T Log-P Diagram</h2>
+                        <div id="diagram-subtitle" class="diagram-subtitle"></div>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <canvas id="skewt-canvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <h3 class="section-title">Atmospheric Parameters</h3>
+                    <div id="parameters-display" class="parameters-grid"></div>
+                </div>
+
+                <div class="data-section">
+                    <h3 class="section-title">Raw Sounding Data</h3>
+                    <div class="data-table-container">
+                        <table id="sounding-table" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Pressure<br><span class="unit">(mb)</span></th>
+                                    <th>Height<br><span class="unit">(m)</span></th>
+                                    <th>Temp<br><span class="unit">(°C)</span></th>
+                                    <th>Dewpoint<br><span class="unit">(°C)</span></th>
+                                    <th>RH<br><span class="unit">(%)</span></th>
+                                    <th>Wind Dir<br><span class="unit">(deg)</span></th>
+                                    <th>Wind Spd<br><span class="unit">(kt)</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="sounding-table-body">
+                                <tr>
+                                    <td colspan="7" class="no-data">No data loaded</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Panel - Radar & NWS Data -->
+            <aside class="right-panel">
+                <div class="panel-section">
+                    <h2 class="section-title">NEXRAD Radar</h2>
+                    <div id="radar-container" class="radar-display">
+                        <div id="radar-image-wrapper">
+                            <img id="radar-image" src="" alt="Radar imagery will appear here">
+                            <div class="radar-overlay">
+                                <div class="radar-timestamp" id="radar-timestamp"></div>
+                            </div>
+                        </div>
+                        <div class="radar-controls">
+                            <button id="radar-refresh" class="small-button">🔄 Refresh</button>
+                            <select id="radar-product" class="small-input">
+                                <option value="N0R">Base Reflectivity</option>
+                                <option value="N0V">Base Velocity</option>
+                                <option value="N0S">Storm Relative Velocity</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2 class="section-title">NWS Forecast Discussion</h2>
+                    <div id="nws-forecast" class="nws-display">
+                        <p class="info-placeholder">Select a station to load forecast</p>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2 class="section-title">Active Alerts & Warnings</h2>
+                    <div id="nws-alerts" class="nws-alerts">
+                        <p class="info-placeholder">No active alerts</p>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2 class="section-title">Current Observations</h2>
+                    <div id="current-obs" class="current-obs-display">
+                        <p class="info-placeholder">Select a station to load observations</p>
+                    </div>
+                </div>
+            </aside>
         </div>
     </div>
 
+    <!-- Export Modal -->
+    <div id="save-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Save Analysis</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="save-options">
+                    <button class="save-option-btn" id="save-json">
+                        <span class="big-icon">📄</span>
+                        <span class="option-title">Save as JSON</span>
+                        <span class="option-desc">Raw data for analysis</span>
+                    </button>
+                    <button class="save-option-btn" id="save-png">
+                        <span class="big-icon">🖼️</span>
+                        <span class="option-title">Save as PNG</span>
+                        <span class="option-desc">Diagram image</span>
+                    </button>
+                    <button class="save-option-btn" id="save-pdf">
+                        <span class="big-icon">📑</span>
+                        <span class="option-title">Save as PDF</span>
+                        <span class="option-desc">Complete report</span>
+                    </button>
+                    <button class="save-option-btn" id="save-csv">
+                        <span class="big-icon">📊</span>
+                        <span class="option-title">Save as CSV</span>
+                        <span class="option-desc">Spreadsheet format</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="stations.js"></script>
     <script src="skewt.js"></script>
     <script src="sounding.js"></script>
+    <script src="radar.js"></script>
+    <script src="nws.js"></script>
+    <script src="save.js"></script>
+    <script src="map.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
