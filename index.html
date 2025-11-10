@@ -47,10 +47,12 @@
                     <div id="map" class="compact-map"></div>
                 </div>
 
-                <!-- Atmospheric Parameters -->
-                <div class="params-card">
-                    <div class="card-title">Atmospheric Indices</div>
-                    <div id="parameters-grid" class="params-grid"></div>
+                <!-- Hodograph -->
+                <div class="hodograph-card">
+                    <div class="card-title">Hodograph</div>
+                    <div class="hodograph-container">
+                        <canvas id="hodograph-canvas"></canvas>
+                    </div>
                 </div>
 
                 <!-- NWS Alerts -->
@@ -71,8 +73,20 @@
                 </div>
             </div>
 
-            <!-- Right Column: Radar & Data Table -->
+            <!-- Right Column: Severe Wx & Data -->
             <div class="right-column">
+                <!-- Severe Weather Analysis -->
+                <div class="severe-wx-card">
+                    <div class="card-title">Severe Weather Analysis</div>
+                    <div id="severe-wx-grid" class="severe-wx-grid"></div>
+                </div>
+
+                <!-- Basic Parameters -->
+                <div class="params-card">
+                    <div class="card-title">Atmospheric Indices</div>
+                    <div id="parameters-grid" class="params-grid"></div>
+                </div>
+
                 <!-- RainViewer Radar -->
                 <div class="radar-card">
                     <div class="card-title">
@@ -125,6 +139,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="stations.js"></script>
+    <script src="hodograph.js"></script>
     <script src="skewt.js"></script>
     <script src="sounding.js"></script>
     <script src="rainviewer.js"></script>

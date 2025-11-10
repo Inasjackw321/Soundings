@@ -27,6 +27,7 @@ class SoundingApp {
      */
     initializeComponents() {
         this.diagram = new SkewTDiagram('skewt-canvas');
+        this.hodograph = new Hodograph('hodograph-canvas');
         this.dataFetcher = new SoundingDataFetcher();
         this.rainViewerRadar = new RainViewerRadar('radar-map');
         this.nwsData = new NWSData();
@@ -191,6 +192,13 @@ class SoundingApp {
         setTimeout(() => {
             this.currentData = this.dataFetcher.generateSampleData();
             this.diagram.render(this.currentData);
+            this.hodograph.plot(
+                this.currentData.pressure,
+                this.currentData.windDirection,
+                this.currentData.windSpeed,
+                this.currentData.height
+            );
+            this.displaySevereWeatherAnalysis(this.currentData.parameters);
             this.displayParametersCompact(this.currentData.parameters);
             this.populateDataTableCompact(this.currentData);
 
@@ -237,6 +245,13 @@ class SoundingApp {
 
             this.currentData = data;
             this.diagram.render(data);
+            this.hodograph.plot(
+                data.pressure,
+                data.windDirection,
+                data.windSpeed,
+                data.height
+            );
+            this.displaySevereWeatherAnalysis(data.parameters);
             this.displayParametersCompact(data.parameters);
             this.populateDataTableCompact(data);
 
@@ -254,12 +269,132 @@ class SoundingApp {
 
             this.currentData = this.dataFetcher.generateSampleData();
             this.diagram.render(this.currentData);
+            this.hodograph.plot(
+                this.currentData.pressure,
+                this.currentData.windDirection,
+                this.currentData.windSpeed,
+                this.currentData.height
+            );
+            this.displaySevereWeatherAnalysis(this.currentData.parameters);
             this.displayParametersCompact(this.currentData.parameters);
             this.populateDataTableCompact(this.currentData);
 
         } finally {
             fetchBtn.disabled = false;
         }
+    }
+
+    /**
+     * Display severe weather analysis
+     */
+    displaySevereWeatherAnalysis(parameters) {
+        const container = document.getElementById('severe-wx-grid');
+        container.innerHTML = '';
+
+        if (!parameters) return;
+
+        const severeParams = [
+            {
+                key: 'stp',
+                label: 'STP',
+                fullName: 'Sig Tornado Parameter',
+                thresholds: { critical: 1.0, elevated: 0.5 }
+            },
+            {
+                key: 'scp',
+                label: 'SCP',
+                fullName: 'Supercell Composite',
+                thresholds: { critical: 4.0, elevated: 1.0 }
+            },
+            {
+                key: 'cape',
+                label: 'CAPE',
+                fullName: 'Conv Avail Pot Energy',
+                thresholds: { critical: 2000, elevated: 1000 }
+            },
+            {
+                key: 'cin',
+                label: 'CIN',
+                fullName: 'Conv Inhibition',
+                thresholds: { critical: -50, elevated: -100 }
+            },
+            {
+                key: 'srh01km',
+                label: '0-1KM SRH',
+                fullName: 'Storm Rel Helicity',
+                thresholds: { critical: 150, elevated: 100 }
+            },
+            {
+                key: 'srh03km',
+                label: '0-3KM SRH',
+                fullName: 'Storm Rel Helicity',
+                thresholds: { critical: 250, elevated: 150 }
+            },
+            {
+                key: 'shear01km',
+                label: '0-1KM SHEAR',
+                fullName: 'Bulk Shear',
+                thresholds: { critical: 20, elevated: 15 }
+            },
+            {
+                key: 'shear06km',
+                label: '0-6KM SHEAR',
+                fullName: 'Bulk Shear',
+                thresholds: { critical: 40, elevated: 30 }
+            },
+            {
+                key: 'ehi',
+                label: 'EHI',
+                fullName: 'Energy Helicity Index',
+                thresholds: { critical: 2.0, elevated: 1.0 }
+            },
+            {
+                key: 'lclHeight',
+                label: 'LCL',
+                fullName: 'Lift Cond Level',
+                thresholds: { critical: 1000, elevated: 1500 }
+            },
+            {
+                key: 'li',
+                label: 'LIFTED INDEX',
+                fullName: 'Lifted Index',
+                thresholds: { critical: -6, elevated: -3 }
+            },
+            {
+                key: 'pw',
+                label: 'PWAT',
+                fullName: 'Precipitable Water',
+                thresholds: { critical: 2.0, elevated: 1.5 }
+            }
+        ];
+
+        severeParams.forEach(param => {
+            if (parameters[param.key]) {
+                const value = parseFloat(parameters[param.key]);
+                let classification = 'marginal';
+
+                if (!isNaN(value) && param.thresholds) {
+                    if (param.key === 'cin' || param.key === 'li' || param.key === 'lclHeight') {
+                        // Inverse thresholds
+                        if (value <= param.thresholds.critical) classification = 'critical';
+                        else if (value <= param.thresholds.elevated) classification = 'elevated';
+                    } else {
+                        // Normal thresholds
+                        if (value >= param.thresholds.critical) classification = 'critical';
+                        else if (value >= param.thresholds.elevated) classification = 'elevated';
+                    }
+                }
+
+                const item = document.createElement('div');
+                item.className = `severe-wx-item ${classification}`;
+                item.innerHTML = `
+                    <div class="severe-wx-label">${param.label}</div>
+                    <div class="severe-wx-value">${parameters[param.key]}</div>
+                    <div class="severe-wx-interpretation">${param.fullName}</div>
+                `;
+                container.appendChild(item);
+            }
+        });
     }
 
     /**
@@ -278,10 +413,10 @@ class SoundingApp {
             { key: 'temp850mb', label: '850MB T' },
             { key: 'temp700mb', label: '700MB T' },
             { key: 'temp500mb', label: '500MB T' },
-            { key: 'lclHeight', label: 'LCL' },
-            { key: 'maxWindSpeed', label: 'MAX WIND' },
-            { key: 'cape', label: 'CAPE' },
-            { key: 'cin', label: 'CIN' }
+            { key: 'lfc', label: 'LFC' },
+            { key: 'el', label: 'EQ LEVEL' },
+            { key: 'kIndex', label: 'K-INDEX' },
+            { key: 'totalTotals', label: 'TOT-TOT' }
         ];
 
         paramsList.forEach(param => {

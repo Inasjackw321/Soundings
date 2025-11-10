@@ -150,7 +150,9 @@ body {
 .alerts-card,
 .radar-card,
 .data-card,
-.obs-card {
+.obs-card,
+.hodograph-card,
+.severe-wx-card {
     background: #252a3a;
     border-bottom: 1px solid #3a4057;
 }
@@ -171,8 +173,68 @@ body {
 
 /* Compact Map */
 .compact-map {
-    height: 240px;
+    height: 200px;
     background: #1a1d29;
+}
+
+/* Hodograph */
+.hodograph-container {
+    padding: 10px;
+    background: #1a1d29;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#hodograph-canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Severe Weather Grid */
+.severe-wx-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 12px;
+}
+
+.severe-wx-item {
+    background: #1a1d29;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.severe-wx-item.critical {
+    border-left: 3px solid #ef4444;
+}
+
+.severe-wx-item.elevated {
+    border-left: 3px solid #f59e0b;
+}
+
+.severe-wx-item.marginal {
+    border-left: 3px solid #22c55e;
+}
+
+.severe-wx-label {
+    font-size: 0.7em;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.severe-wx-value {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #e8eaed;
+}
+
+.severe-wx-interpretation {
+    font-size: 0.7em;
+    color: #6b7280;
+    margin-top: 2px;
 }
 
 /* Parameters Grid */
