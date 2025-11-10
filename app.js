@@ -19,7 +19,7 @@ class SoundingApp {
         this.attachEventListeners();
         this.populateStationDropdown();
         this.setDefaultDate();
-        this.loadSampleData();
+        this.autoLoadLatestSounding();
     }
 
     /**
@@ -63,6 +63,10 @@ class SoundingApp {
         });
 
         // Save buttons
+        document.getElementById('save-pdf').addEventListener('click', () => {
+            this.saveExport.saveAsPDF();
+        });
+
         document.getElementById('save-json').addEventListener('click', () => {
             this.saveExport.saveAsJSON();
         });
@@ -190,30 +194,29 @@ class SoundingApp {
     }
 
     /**
-     * Load sample data
+     * Auto-load latest sounding from default station
      */
-    loadSampleData() {
-        this.showStatus('Loading sample data...', 'loading');
+    async autoLoadLatestSounding() {
+        this.showStatus('Loading latest sounding...', 'loading');
 
+        // Set default station
+        const defaultStation = StationDatabase.getStationById('72451'); // OKC
+        if (defaultStation) {
+            this.stationMap.selectStationById(defaultStation.id);
+            document.getElementById('station-select').value = defaultStation.id;
+        }
+
+        // Get latest sounding time
+        const latestTime = this.dataFetcher.getLatestSoundingTime();
+
+        // Update date input
+        const dateStr = `${latestTime.year}-${String(latestTime.month).padStart(2, '0')}-${String(latestTime.day).padStart(2, '0')}`;
+        document.getElementById('date-input').value = dateStr;
+        document.getElementById('hour-select').value = String(latestTime.hour).padStart(2, '0');
+
+        // Fetch real data
         setTimeout(() => {
-            this.currentData = this.dataFetcher.generateSampleData();
-            this.diagram.render(this.currentData);
-            this.hodograph.plot(
-                this.currentData.pressure,
-                this.currentData.windDirection,
-                this.currentData.windSpeed,
-                this.currentData.height
-            );
-            this.displaySevereWeatherAnalysis(this.currentData.parameters);
-            this.displayParametersCompact(this.currentData.parameters);
-            this.populateDataTableCompact(this.currentData);
-
-            const defaultStation = StationDatabase.getStationById('72451');
-            if (defaultStation) {
-                this.stationMap.selectStationById(defaultStation.id);
-            }
-
-            this.showStatus('Sample data loaded. Select station and click Load Sounding for real data.', 'success');
+            this.fetchSounding();
         }, 500);
     }
 
@@ -273,21 +276,7 @@ class SoundingApp {
 
         } catch (error) {
             console.error('Fetch error:', error);
-            this.showStatus('Unable to fetch NWS data. Using sample. Try different date/station.', 'error');
-
-            // Fallback to sample data
-            const sampleGenerator = new SoundingDataFetcher();
-            this.currentData = sampleGenerator.generateSampleData();
-            this.diagram.render(this.currentData);
-            this.hodograph.plot(
-                this.currentData.pressure,
-                this.currentData.windDirection,
-                this.currentData.windSpeed,
-                this.currentData.height
-            );
-            this.displaySevereWeatherAnalysis(this.currentData.parameters);
-            this.displayParametersCompact(this.currentData.parameters);
-            this.populateDataTableCompact(this.currentData);
+            this.showStatus(`Failed to fetch data: ${error.message}. Try different date/station/source.`, 'error');
 
         } finally {
             fetchBtn.disabled = false;

@@ -302,30 +302,92 @@ class SaveExport {
             doc.addImage(imgData, 'PNG', xPos, y, imgWidth, imgHeight);
         }
 
-        // ===== PAGE 3: HODOGRAPH =====
+        // ===== PAGE 3: RADAR AND HODOGRAPH =====
         doc.addPage();
         y = 20;
 
         doc.setFontSize(16);
         doc.setFont('helvetica', 'bold');
-        doc.text('Hodograph', 105, y, { align: 'center' });
+        doc.text('Radar & Wind Profile Analysis', 105, y, { align: 'center' });
         y += 10;
+
+        // Radar Map
+        const radarMap = document.getElementById('radar-map');
+        if (radarMap) {
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Current Radar', 20, y);
+            y += 6;
+
+            // Capture radar map
+            try {
+                // Get the Leaflet map container
+                const mapContainer = radarMap.querySelector('.leaflet-container');
+                if (mapContainer) {
+                    // Use html2canvas-like approach or direct canvas capture
+                    const canvas = document.createElement('canvas');
+                    canvas.width = mapContainer.offsetWidth;
+                    canvas.height = mapContainer.offsetHeight;
+                    const ctx = canvas.getContext('2d');
+
+                    // Draw background
+                    ctx.fillStyle = '#1a1d29';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    // Get all tile images
+                    const tiles = mapContainer.querySelectorAll('.leaflet-tile');
+                    tiles.forEach(tile => {
+                        if (tile.complete && tile.naturalHeight !== 0) {
+                            const transform = tile.style.transform;
+                            const match = transform.match(/translate3d\((.+?)px, (.+?)px/);
+                            if (match) {
+                                ctx.drawImage(tile, parseFloat(match[1]), parseFloat(match[2]));
+                            }
+                        }
+                    });
+
+                    const radarImg = canvas.toDataURL('image/png');
+                    const imgWidth = 170;
+                    const imgHeight = 100;
+                    const xPos = (210 - imgWidth) / 2;
+                    doc.addImage(radarImg, 'PNG', xPos, y, imgWidth, imgHeight);
+                    y += imgHeight + 10;
+                } else {
+                    doc.setFont('helvetica', 'italic');
+                    doc.setFontSize(10);
+                    doc.text('Radar imagery not available in PDF export', 105, y + 20, { align: 'center' });
+                    y += 35;
+                }
+            } catch (error) {
+                console.error('Error capturing radar:', error);
+                doc.setFont('helvetica', 'italic');
+                doc.setFontSize(10);
+                doc.text('Radar imagery capture failed', 105, y + 20, { align: 'center' });
+                y += 35;
+            }
+        }
+
+        // Hodograph
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Hodograph', 20, y);
+        y += 6;
 
         const hodographCanvas = document.getElementById('hodograph-canvas');
         if (hodographCanvas) {
             const imgData = hodographCanvas.toDataURL('image/png');
-            const imgSize = 140; // Square
+            const imgSize = 110;
 
             // Center the image
             const xPos = (210 - imgSize) / 2;
             doc.addImage(imgData, 'PNG', xPos, y, imgSize, imgSize);
-            y += imgSize + 10;
+            y += imgSize + 6;
 
             // Add hodograph legend
-            doc.setFontSize(10);
+            doc.setFontSize(9);
             doc.setFont('helvetica', 'normal');
             doc.text('Height Color Legend:', 105, y, { align: 'center' });
-            y += 6;
+            y += 5;
 
             const legendItems = [
                 { color: [239, 68, 68], label: '0-1 km AGL' },
@@ -334,16 +396,185 @@ class SaveExport {
                 { color: [34, 197, 94], label: '6+ km AGL' }
             ];
 
-            const legendX = 70;
+            const legendX = 75;
             legendItems.forEach((item, i) => {
                 doc.setFillColor(item.color[0], item.color[1], item.color[2]);
-                doc.rect(legendX, y - 3, 5, 4, 'F');
-                doc.text(item.label, legendX + 8, y);
-                y += 6;
+                doc.rect(legendX, y - 3, 4, 3, 'F');
+                doc.setFontSize(8);
+                doc.text(item.label, legendX + 6, y);
+                y += 4;
             });
         }
 
-        // ===== PAGE 4: DATA TABLE =====
+        // ===== PAGE 4: ENVIRONMENTAL SUMMARY =====
+        doc.addPage();
+        y = 20;
+
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Environmental Summary', 105, y, { align: 'center' });
+        y += 10;
+
+        // NWS Alerts
+        const alertsContainer = document.getElementById('nws-alerts-compact');
+        if (alertsContainer && alertsContainer.textContent.trim() !== '') {
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Active Weather Alerts', 20, y);
+            y += 6;
+
+            const alerts = alertsContainer.querySelectorAll('.alert-item-compact');
+            if (alerts.length > 0) {
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'normal');
+                alerts.forEach((alert, idx) => {
+                    if (y > 270) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                    const alertText = alert.textContent.trim();
+                    // Color code based on severity
+                    if (alertText.toLowerCase().includes('warning')) {
+                        doc.setTextColor(239, 68, 68); // Red
+                        doc.setFont('helvetica', 'bold');
+                    } else if (alertText.toLowerCase().includes('watch')) {
+                        doc.setTextColor(245, 158, 11); // Orange
+                        doc.setFont('helvetica', 'bold');
+                    } else {
+                        doc.setTextColor(234, 179, 8); // Yellow
+                    }
+                    doc.text(`• ${alertText}`, 22, y);
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFont('helvetica', 'normal');
+                    y += 5;
+                });
+                y += 5;
+            } else {
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'italic');
+                doc.text('No active alerts for this location', 22, y);
+                y += 10;
+            }
+        }
+
+        // Forecast Summary
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Forecast Summary', 20, y);
+        y += 6;
+
+        const forecastContainer = document.getElementById('nws-forecast');
+        if (forecastContainer && forecastContainer.textContent.trim() !== '') {
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            const forecastText = forecastContainer.textContent.trim();
+            const lines = doc.splitTextToSize(forecastText, 170);
+            lines.forEach(line => {
+                if (y > 275) {
+                    doc.addPage();
+                    y = 20;
+                }
+                doc.text(line, 22, y);
+                y += 5;
+            });
+            y += 5;
+        } else {
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'italic');
+            doc.text('Forecast data not available', 22, y);
+            y += 10;
+        }
+
+        // Severe Weather Potential Summary
+        if (this.currentData.parameters) {
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Severe Weather Potential Summary', 20, y);
+            y += 6;
+
+            const params = this.currentData.parameters;
+            const threats = [];
+
+            // Tornado threat
+            if (params.stp >= 1) {
+                threats.push({ level: 'HIGH', type: 'Tornado', reason: `STP = ${params.stp.toFixed(1)}` });
+            } else if (params.stp >= 0.5) {
+                threats.push({ level: 'MODERATE', type: 'Tornado', reason: `STP = ${params.stp.toFixed(1)}` });
+            }
+
+            // Supercell threat
+            if (params.scp >= 4) {
+                threats.push({ level: 'HIGH', type: 'Supercells', reason: `SCP = ${params.scp.toFixed(1)}` });
+            } else if (params.scp >= 1) {
+                threats.push({ level: 'MODERATE', type: 'Supercells', reason: `SCP = ${params.scp.toFixed(1)}` });
+            }
+
+            // Hail threat
+            if (params.cape >= 2000 && params.shear06km >= 40) {
+                threats.push({ level: 'HIGH', type: 'Large Hail', reason: `High CAPE + Strong Shear` });
+            } else if (params.cape >= 1000 && params.shear06km >= 30) {
+                threats.push({ level: 'MODERATE', type: 'Hail', reason: `Moderate CAPE + Shear` });
+            }
+
+            // Wind threat
+            if (params.cape >= 1500 && params.shear06km >= 35) {
+                threats.push({ level: 'MODERATE', type: 'Damaging Winds', reason: `CAPE + Shear favorable` });
+            }
+
+            // Flooding threat
+            if (params.pwat >= 40) {
+                threats.push({ level: 'MODERATE', type: 'Heavy Rain/Flooding', reason: `High PWAT = ${params.pwat.toFixed(1)} mm` });
+            }
+
+            if (threats.length > 0) {
+                doc.setFontSize(9);
+                threats.forEach(threat => {
+                    if (y > 275) {
+                        doc.addPage();
+                        y = 20;
+                    }
+
+                    if (threat.level === 'HIGH') {
+                        doc.setTextColor(239, 68, 68);
+                    } else {
+                        doc.setTextColor(245, 158, 11);
+                    }
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`${threat.level}: ${threat.type}`, 22, y);
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(` - ${threat.reason}`, 70, y);
+                    y += 5;
+                });
+            } else {
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'italic');
+                doc.text('Low severe weather potential', 22, y);
+            }
+            y += 10;
+        }
+
+        // Analysis Notes
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Analysis Notes', 20, y);
+        y += 6;
+
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        const notes = [
+            `Data Source: ${document.getElementById('data-source-select')?.selectedOptions[0]?.text || 'NWS'}`,
+            `Valid Time: ${this.currentDate || 'N/A'}`,
+            `Station Elevation: ${this.currentStation?.elevation || 'N/A'} m`,
+            `Analysis generated: ${new Date().toLocaleString()}`
+        ];
+
+        notes.forEach(note => {
+            doc.text(note, 22, y);
+            y += 5;
+        });
+
+        // ===== PAGE 5: DATA TABLE =====
         doc.addPage();
         y = 20;
 

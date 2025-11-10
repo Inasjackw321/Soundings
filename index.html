@@ -40,6 +40,7 @@
                 <div id="station-coords-display"></div>
             </div>
             <div class="spacer"></div>
+            <button id="save-pdf" class="icon-button" title="Save Comprehensive PDF">PDF</button>
             <button id="save-json" class="icon-button" title="Save JSON">JSON</button>
             <button id="save-csv" class="icon-button" title="Save CSV">CSV</button>
             <button id="save-png" class="icon-button" title="Save PNG">PNG</button>
@@ -53,6 +54,19 @@
                 <div class="map-card">
                     <div class="card-title">Station Selection</div>
                     <div id="map" class="compact-map"></div>
+                </div>
+
+                <!-- RainViewer Radar -->
+                <div class="radar-card">
+                    <div class="card-title">
+                        <span>RainViewer Radar</span>
+                        <div class="radar-controls-inline">
+                            <button id="radar-play" class="mini-button">▶</button>
+                            <input type="range" id="radar-slider" class="radar-slider" min="0" max="11" value="11">
+                            <span id="radar-time" class="radar-time-label">Current</span>
+                        </div>
+                    </div>
+                    <div id="radar-map" class="radar-map"></div>
                 </div>
 
                 <!-- Hodograph -->
@@ -93,19 +107,6 @@
                 <div class="params-card">
                     <div class="card-title">Atmospheric Indices</div>
                     <div id="parameters-grid" class="params-grid"></div>
-                </div>
-
-                <!-- RainViewer Radar -->
-                <div class="radar-card">
-                    <div class="card-title">
-                        <span>RainViewer Radar</span>
-                        <div class="radar-controls-inline">
-                            <button id="radar-play" class="mini-button">▶</button>
-                            <input type="range" id="radar-slider" class="radar-slider" min="0" max="11" value="11">
-                            <span id="radar-time" class="radar-time-label">Current</span>
-                        </div>
-                    </div>
-                    <div id="radar-map" class="radar-map"></div>
                 </div>
 
                 <!-- Sounding Data Table -->
