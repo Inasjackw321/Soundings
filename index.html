@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Soundings Visualizer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Weather Soundings Visualizer</h1>
+            <p class="subtitle">Interactive Skew-T Log-P Diagrams</p>
+        </header>
+
+        <div class="controls-panel">
+            <div class="control-group">
+                <label for="station-select">Station:</label>
+                <select id="station-select">
+                    <optgroup label="North America">
+                        <option value="72327">Oakland, CA (KOAK)</option>
+                        <option value="72476">Denver, CO (KDEN)</option>
+                        <option value="72558">Amarillo, TX (KAMA)</option>
+                        <option value="72645">Dallas, TX (KDFW)</option>
+                        <option value="72672">Lake Charles, LA (KLCH)</option>
+                        <option value="72230">Spokane, WA (KOTX)</option>
+                        <option value="72528">Dodge City, KS (KDDC)</option>
+                        <option value="72340">Vandenberg AFB, CA (KVBG)</option>
+                        <option value="72493">Albuquerque, NM (KABQ)</option>
+                        <option value="72363">San Diego, CA (KNKX)</option>
+                        <option value="72451" selected>Salt Lake City, UT (KSLC)</option>
+                        <option value="72520">Rapid City, SD (KUNR)</option>
+                        <option value="72776">Nashville, TN (KBNA)</option>
+                        <option value="74389">Miami, FL (KMFL)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="date-input">Date:</label>
+                <input type="date" id="date-input">
+            </div>
+
+            <div class="control-group">
+                <label for="hour-select">Hour (UTC):</label>
+                <select id="hour-select">
+                    <option value="00">00Z</option>
+                    <option value="12" selected>12Z</option>
+                </select>
+            </div>
+
+            <button id="fetch-btn" class="fetch-button">Fetch Sounding</button>
+            <div id="status" class="status-message"></div>
+        </div>
+
+        <div class="visualization-container">
+            <canvas id="skewt-canvas"></canvas>
+        </div>
+
+        <div class="info-panel" id="info-panel">
+            <h3>Atmospheric Parameters</h3>
+            <div id="parameters-display"></div>
+        </div>
+    </div>
+
+    <script src="skewt.js"></script>
+    <script src="sounding.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
