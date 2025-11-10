@@ -26,6 +26,14 @@
                     <option value="12" selected>12Z</option>
                 </select>
             </div>
+            <div class="control-section">
+                <label>Data Source</label>
+                <select id="data-source-select" class="control-input">
+                    <option value="iowa-state" selected>Iowa State (NWS/SPC)</option>
+                    <option value="uwyo">U. Wyoming</option>
+                    <option value="spc">SPC Direct</option>
+                </select>
+            </div>
             <button id="fetch-btn" class="load-button">Load Sounding</button>
             <div class="control-section station-info-compact">
                 <div id="station-name-display">Select Station</div>
@@ -142,6 +150,7 @@
     <script src="hodograph.js"></script>
     <script src="skewt.js"></script>
     <script src="sounding.js"></script>
+    <script src="nws-data.js"></script>
     <script src="rainviewer.js"></script>
     <script src="nws.js"></script>
     <script src="save.js"></script>

@@ -28,7 +28,7 @@ class SoundingApp {
     initializeComponents() {
         this.diagram = new SkewTDiagram('skewt-canvas');
         this.hodograph = new Hodograph('hodograph-canvas');
-        this.dataFetcher = new SoundingDataFetcher();
+        this.dataFetcher = new NWSUpperAir(); // Use new NWS data source
         this.rainViewerRadar = new RainViewerRadar('radar-map');
         this.nwsData = new NWSData();
         this.saveExport = new SaveExport();
@@ -54,6 +54,12 @@ class SoundingApp {
             if (stationId) {
                 this.stationMap.selectStationById(stationId);
             }
+        });
+
+        // Data source selection
+        document.getElementById('data-source-select').addEventListener('change', (e) => {
+            this.dataFetcher.setSource(e.target.value);
+            this.showStatus(`Data source changed to: ${e.target.options[e.target.selectedIndex].text}`, 'info');
         });
 
         // Save buttons
@@ -229,14 +235,16 @@ class SoundingApp {
 
         const fetchBtn = document.getElementById('fetch-btn');
         fetchBtn.disabled = true;
-        this.showStatus('Fetching sounding data...', 'loading');
+        this.showStatus('Fetching sounding data from NWS sources...', 'loading');
 
         try {
+            // Use new NWS data fetcher with separate hour parameter
             const data = await this.dataFetcher.fetchSounding(
                 stationId,
-                year,
-                month,
-                day + hour
+                parseInt(year),
+                parseInt(month),
+                parseInt(day),
+                parseInt(hour)
             );
 
             if (data.pressure.length === 0) {
@@ -265,9 +273,11 @@ class SoundingApp {
 
         } catch (error) {
             console.error('Fetch error:', error);
-            this.showStatus('Unable to fetch data. Using sample. Try different date/station.', 'error');
+            this.showStatus('Unable to fetch NWS data. Using sample. Try different date/station.', 'error');
 
-            this.currentData = this.dataFetcher.generateSampleData();
+            // Fallback to sample data
+            const sampleGenerator = new SoundingDataFetcher();
+            this.currentData = sampleGenerator.generateSampleData();
             this.diagram.render(this.currentData);
             this.hodograph.plot(
                 this.currentData.pressure,
