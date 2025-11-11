@@ -238,7 +238,7 @@ class SoundingApp {
 
         const fetchBtn = document.getElementById('fetch-btn');
         fetchBtn.disabled = true;
-        this.showStatus('Fetching sounding data from NWS sources...', 'loading');
+        this.showStatus('Fetching real NWS sounding data (will try multiple sources if needed)...', 'loading');
 
         try {
             // Use new NWS data fetcher with separate hour parameter
@@ -276,7 +276,7 @@ class SoundingApp {
 
         } catch (error) {
             console.error('Fetch error:', error);
-            this.showStatus(`Failed to fetch data: ${error.message}. Try different date/station/source.`, 'error');
+            this.showStatus(`Failed to fetch data: ${error.message}. Try an earlier date/time or different station.`, 'error');
 
         } finally {
             fetchBtn.disabled = false;

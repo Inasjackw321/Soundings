@@ -26,23 +26,49 @@ class NWSUpperAir {
     }
 
     /**
-     * Fetch sounding data
+     * Fetch sounding data with automatic fallback between sources
      */
     async fetchSounding(stationId, year, month, day, hour) {
-        try {
-            switch (this.currentSource) {
-                case this.sources.UWYO:
-                    return await this.fetchFromUWyo(stationId, year, month, day, hour);
-                case this.sources.SPC:
-                    return await this.fetchFromSPC(stationId, year, month, day, hour);
-                case this.sources.IOWA_STATE:
-                default:
-                    return await this.fetchFromIowaState(stationId, year, month, day, hour);
+        const sources = [this.currentSource];
+
+        // Add other sources as fallback
+        if (this.currentSource !== this.sources.IOWA_STATE) sources.push(this.sources.IOWA_STATE);
+        if (this.currentSource !== this.sources.UWYO) sources.push(this.sources.UWYO);
+        if (this.currentSource !== this.sources.SPC) sources.push(this.sources.SPC);
+
+        let lastError = null;
+
+        for (const source of sources) {
+            try {
+                console.log(`Attempting to fetch from ${source}...`);
+                let data;
+
+                switch (source) {
+                    case this.sources.UWYO:
+                        data = await this.fetchFromUWyo(stationId, year, month, day, hour);
+                        break;
+                    case this.sources.SPC:
+                        data = await this.fetchFromSPC(stationId, year, month, day, hour);
+                        break;
+                    case this.sources.IOWA_STATE:
+                    default:
+                        data = await this.fetchFromIowaState(stationId, year, month, day, hour);
+                        break;
+                }
+
+                console.log(`Successfully fetched from ${source}`);
+                return data;
+
+            } catch (error) {
+                console.warn(`Failed to fetch from ${source}: ${error.message}`);
+                lastError = error;
+                // Try next source
+                continue;
             }
-        } catch (error) {
-            console.error('Error fetching sounding:', error);
-            throw error;
         }
+
+        // All sources failed
+        throw new Error(`All data sources failed. Last error: ${lastError?.message || 'Unknown error'}`);
     }
 
     /**
@@ -74,7 +100,11 @@ class NWSUpperAir {
 
         const url = `https://weather.uwyo.edu/cgi-bin/sounding?region=naconf&TYPE=TEXT:LIST&YEAR=${year}&MONTH=${paddedMonth}&FROM=${fromTo}&TO=${fromTo}&STNM=${stationId}`;
 
-        const response = await fetch(url);
+        // Try with CORS proxy for browser compatibility
+        const proxyURL = 'https://api.allorigins.win/raw?url=';
+        const finalURL = proxyURL + encodeURIComponent(url);
+
+        const response = await fetch(finalURL);
         if (!response.ok) {
             throw new Error(`UWyo API error: ${response.status}`);
         }
@@ -93,7 +123,11 @@ class NWSUpperAir {
         const dateStr = `${year}${month.toString().padStart(2, '0')}${day.toString().padStart(2, '0')}${hour.toString().padStart(2, '0')}`;
         const url = `https://www.spc.noaa.gov/exper/soundings/${dateStr}_OBS/${stationId}.txt`;
 
-        const response = await fetch(url);
+        // Try with CORS proxy for browser compatibility
+        const proxyURL = 'https://api.allorigins.win/raw?url=';
+        const finalURL = proxyURL + encodeURIComponent(url);
+
+        const response = await fetch(finalURL);
         if (!response.ok) {
             throw new Error(`SPC API error: ${response.status}`);
         }
@@ -308,9 +342,10 @@ class NWSUpperAir {
             soundingHour = 0;
         }
 
-        // If current time is less than 2 hours after sounding time,
+        // If current time is less than 4 hours after sounding time,
         // use previous sounding (data may not be available yet)
-        if (utcHour < soundingHour + 2) {
+        // Upper air data can take 2-4 hours to be processed and uploaded
+        if (utcHour < soundingHour + 4) {
             soundingHour = soundingHour === 0 ? 12 : 0;
             if (soundingHour === 12) {
                 now.setUTCDate(now.getUTCDate() - 1);
