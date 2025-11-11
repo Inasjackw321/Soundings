@@ -169,13 +169,13 @@ class SoundingDataFetcher {
         // Calculate parcel path and CAPE/CIN
         const parcelData = this.calculateCAPE(data);
         if (parcelData) {
-            params.cape = parcelData.cape.toFixed(0) + ' J/kg';
-            params.cin = parcelData.cin.toFixed(0) + ' J/kg';
-            params.lclHeight = parcelData.lclHeight.toFixed(0) + ' m';
-            params.lclPressure = parcelData.lclPressure.toFixed(0) + ' mb';
-            if (parcelData.lfc) params.lfc = parcelData.lfc.toFixed(0) + ' m';
-            if (parcelData.el) params.el = parcelData.el.toFixed(0) + ' m';
-            params.li = parcelData.li.toFixed(1);
+            params.cape = parseFloat(parcelData.cape.toFixed(0));
+            params.cin = parseFloat(parcelData.cin.toFixed(0));
+            params.lclHeight = parseFloat(parcelData.lclHeight.toFixed(0));
+            params.lclPressure = parseFloat(parcelData.lclPressure.toFixed(0));
+            if (parcelData.lfc) params.lfc = parseFloat(parcelData.lfc.toFixed(0));
+            if (parcelData.el) params.el = parseFloat(parcelData.el.toFixed(0));
+            params.li = parseFloat(parcelData.li.toFixed(1));
         }
 
         // Bulk shear calculations
@@ -183,46 +183,49 @@ class SoundingDataFetcher {
         const shear03km = this.calculateBulkShear(data, 0, 3000);
         const shear06km = this.calculateBulkShear(data, 0, 6000);
 
-        if (shear01km) params.shear01km = shear01km.toFixed(1) + ' kt';
-        if (shear03km) params.shear03km = shear03km.toFixed(1) + ' kt';
-        if (shear06km) params.shear06km = shear06km.toFixed(1) + ' kt';
+        if (shear01km) params.shear01km = parseFloat(shear01km.toFixed(1));
+        if (shear03km) params.shear03km = parseFloat(shear03km.toFixed(1));
+        if (shear06km) params.shear06km = parseFloat(shear06km.toFixed(1));
 
         // Storm Relative Helicity
         const srh01km = this.calculateSRH(data, 0, 1000);
         const srh03km = this.calculateSRH(data, 0, 3000);
 
-        if (srh01km) params.srh01km = srh01km.toFixed(0) + ' m²/s²';
-        if (srh03km) params.srh03km = srh03km.toFixed(0) + ' m²/s²';
+        if (srh01km) params.srh01km = parseFloat(srh01km.toFixed(0));
+        if (srh03km) params.srh03km = parseFloat(srh03km.toFixed(0));
 
         // Significant Tornado Parameter
         if (parcelData && shear06km && srh01km) {
             const stp = this.calculateSTP(parcelData.cape, parcelData.cin, parcelData.lclHeight, shear06km, srh01km);
-            params.stp = stp.toFixed(2);
+            params.stp = parseFloat(stp.toFixed(2));
         }
 
         // Supercell Composite Parameter
         if (parcelData && shear06km) {
             const scp = this.calculateSCP(parcelData.cape, shear06km);
-            params.scp = scp.toFixed(1);
+            params.scp = parseFloat(scp.toFixed(1));
         }
 
         // Energy Helicity Index
         if (parcelData && srh01km) {
             const ehi = (parcelData.cape * srh01km) / 160000;
-            params.ehi = ehi.toFixed(1);
+            params.ehi = parseFloat(ehi.toFixed(1));
         }
 
-        // Precipitable Water
+        // Precipitable Water (convert inches to mm for consistency)
         const pw = this.calculatePW(data);
-        if (pw) params.pw = pw.toFixed(2) + ' in';
+        if (pw) {
+            const pwMM = pw * 25.4; // Convert inches to mm
+            params.pwat = parseFloat(pwMM.toFixed(1));
+        }
 
         // K-Index
         const kIndex = this.calculateKIndex(data);
-        if (kIndex) params.kIndex = kIndex.toFixed(1);
+        if (kIndex) params.kIndex = parseFloat(kIndex.toFixed(1));
 
         // Total Totals
         const tt = this.calculateTotalTotals(data);
-        if (tt) params.totalTotals = tt.toFixed(1);
+        if (tt) params.totalTotals = parseFloat(tt.toFixed(1));
 
         // Maximum wind speed
         const maxWind = Math.max(...data.windSpeed.filter(w => !isNaN(w) && w !== null));

@@ -360,10 +360,10 @@ class SoundingApp {
                 thresholds: { critical: -6, elevated: -3 }
             },
             {
-                key: 'pw',
+                key: 'pwat',
                 label: 'PWAT',
                 fullName: 'Precipitable Water',
-                thresholds: { critical: 2.0, elevated: 1.5 }
+                thresholds: { critical: 40, elevated: 30 }
             }
         ];
 

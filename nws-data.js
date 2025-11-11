@@ -11,6 +11,9 @@ class NWSUpperAir {
             SPC: 'spc'
         };
         this.currentSource = this.sources.IOWA_STATE;
+
+        // Use SoundingDataFetcher for parameter calculations
+        this.calculator = new SoundingDataFetcher();
     }
 
     /**
@@ -128,6 +131,11 @@ class NWSUpperAir {
             result.windSpeed.push(level.sknt);
         }
 
+        // Calculate atmospheric parameters
+        if (result.pressure.length > 0) {
+            result.parameters = this.calculator.calculateParameters(result);
+        }
+
         return result;
     }
 
@@ -202,6 +210,11 @@ class NWSUpperAir {
             throw new Error('No valid sounding data found in response');
         }
 
+        // Calculate atmospheric parameters
+        if (result.pressure.length > 0) {
+            result.parameters = this.calculator.calculateParameters(result);
+        }
+
         return result;
     }
 
@@ -269,6 +282,11 @@ class NWSUpperAir {
 
         if (result.pressure.length === 0) {
             throw new Error('No valid sounding data found in SPC response');
+        }
+
+        // Calculate atmospheric parameters
+        if (result.pressure.length > 0) {
+            result.parameters = this.calculator.calculateParameters(result);
         }
 
         return result;
